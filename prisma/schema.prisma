@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
+
+model Flower {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  imageFile   String
+  category    String
+  stock       Int
+}
+
+model Supplier {
+  id           Int    @id @default(autoincrement())
+  name         String
+  contactEmail String
+  phoneNumber  String
+}
+
+model LoginHistory {
+  id        Int      @id @default(autoincrement())
+  username  String
+  fullName  String?
+  loginTime DateTime @default(now())
+  ipAddress String
+}
