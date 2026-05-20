@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 const CATEGORIES = ['All', 'Rose', 'Tulip', 'Lily', 'Orchid', 'Sunflower', 'Other']
 
 export default async function FlowersPage({

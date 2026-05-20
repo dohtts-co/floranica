@@ -1,8 +1,9 @@
+import "dotenv/config";
 import { PrismaClient } from '../app/generated/prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import bcrypt from 'bcryptjs'
 
-const adapter = new PrismaBetterSqlite3({ url: 'file:./prisma/dev.db' })
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
@@ -13,7 +14,7 @@ async function main() {
     create: { username: 'admin', password: hashed },
   })
 
-  const suppliers = [
+  const supplierData = [
     { name: 'Bloom & Co', contactEmail: 'contact@bloomco.com', phoneNumber: '01234 567890' },
     { name: 'FloraDirect', contactEmail: 'hello@floradirect.co.uk', phoneNumber: '020 1111 2222' },
     { name: 'Petal Partners', contactEmail: 'info@petalpartners.com', phoneNumber: '07890 123456' },
@@ -26,15 +27,15 @@ async function main() {
     { name: 'Greenhouse Grove', contactEmail: 'contact@greenhousegrove.org', phoneNumber: '07400 667788' },
   ]
 
-  for (const s of suppliers) {
+  for (const s of supplierData) {
     await prisma.supplier.upsert({
-      where: { id: suppliers.indexOf(s) + 1 },
+      where: { id: supplierData.indexOf(s) + 1 },
       update: {},
       create: s,
     })
   }
 
-  const flowers = [
+  const flowerData = [
     { name: 'Red Rose', description: 'Classic red rose, symbol of love', price: 4.99, imageFile: '', category: 'Rose', stock: 120 },
     { name: 'Yellow Tulip', description: 'Bright yellow tulip, cheerful bloom', price: 3.49, imageFile: '', category: 'Tulip', stock: 85 },
     { name: 'White Lily', description: 'Elegant white lily, pure and fragrant', price: 5.99, imageFile: '', category: 'Lily', stock: 60 },
@@ -42,7 +43,7 @@ async function main() {
     { name: 'Sunflower', description: 'Bold sunflower, brings sunshine indoors', price: 2.99, imageFile: '', category: 'Sunflower', stock: 200 },
   ]
 
-  for (const f of flowers) {
+  for (const f of flowerData) {
     await prisma.flower.create({ data: f })
   }
 
