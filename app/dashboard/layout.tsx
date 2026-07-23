@@ -1,48 +1,59 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { verifySession } from '@/lib/dal'
 import { logout } from '@/app/actions/auth'
+import { ArchiveNotice } from '@/components/archive-notice'
+import { NavLink } from '@/components/nav-link'
+
+const ADMIN_LINKS = [
+  { href: '/dashboard', label: 'Overview', exact: true },
+  { href: '/dashboard/manage', label: 'Manage flowers', exact: false },
+  { href: '/dashboard/records', label: 'Records', exact: false },
+  { href: '/dashboard/suppliers', label: 'Suppliers', exact: false },
+  { href: '/dashboard/history', label: 'Login history', exact: false },
+] as const
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await verifySession()
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header style={{ backgroundColor: '#e3f2e1', borderBottom: '2px solid #b7d7b0' }}
-        className="px-6 py-4 flex items-center gap-4 flex-wrap">
-        <Link href="/dashboard">
-          <Image src="/flowers-icon.png" alt="Floranica Logo" width={50} height={50} />
-        </Link>
-        <h1 style={{ color: '#2d572c' }} className="text-xl font-bold flex-1">
-          Floranica Backend Control Panel
-        </h1>
-        <nav className="flex gap-4 flex-wrap items-center text-sm">
-          {[
-            ['/dashboard', 'Admin Home'],
-            ['/dashboard/manage', 'Manage Flowers'],
-            ['/dashboard/records', 'View Records'],
-            ['/dashboard/suppliers', 'Suppliers'],
-            ['/dashboard/history', 'Login History'],
-          ].map(([href, label]) => (
-            <Link key={href} href={href} style={{ color: '#3d8045' }} className="font-semibold hover:underline">
-              {label}
-            </Link>
-          ))}
-          <form action={logout}>
-            <button type="submit" className="font-semibold hover:underline" style={{ color: '#c0392b' }}>
-              Log Out
+    <div className="flex min-h-screen flex-col">
+      <ArchiveNotice />
+
+      <header className="border-b border-line bg-surface">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 sm:px-8">
+          <Link href="/dashboard" className="flex items-baseline gap-2 rounded-sm">
+            <span className="font-display text-lg font-semibold tracking-tight">Floranica</span>
+            <span className="eyebrow text-ink-faint">Control panel</span>
+          </Link>
+
+          <form action={logout} className="ml-auto">
+            <button
+              type="submit"
+              className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors duration-150 hover:border-petal/50 hover:text-petal"
+            >
+              Log out
             </button>
           </form>
+        </div>
+
+        <nav
+          aria-label="Admin sections"
+          className="mx-auto flex max-w-6xl flex-wrap gap-1 px-3 pb-1 sm:px-6"
+        >
+          {ADMIN_LINKS.map(link => (
+            <NavLink key={link.href} href={link.href} exact={link.exact}>
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
       </header>
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-8 py-8">
-        {children}
-      </main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8">{children}</main>
 
-      <footer style={{ backgroundColor: '#f1f1f1', borderTop: '1px solid #ddd' }}
-        className="text-center py-4 text-sm text-gray-500">
-        &copy; 2025 Floranica
+      <footer className="border-t border-line bg-sunk">
+        <p className="mx-auto max-w-6xl px-5 py-6 text-sm text-ink-faint sm:px-8">
+          © 2025 Floranica. A fictional company created for coursework.
+        </p>
       </footer>
     </div>
   )

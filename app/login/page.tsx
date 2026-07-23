@@ -1,59 +1,39 @@
-'use client'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { ArchiveNotice } from '@/components/archive-notice'
+import { LoginForm } from '@/components/login-form'
 
-import { useActionState } from 'react'
-import { login } from '@/app/actions/auth'
+export const metadata: Metadata = {
+  title: 'Admin sign in',
+  description: 'Sign in to the Floranica administration panel.',
+}
 
 export default function LoginPage() {
-  const [state, action, pending] = useActionState(login, undefined)
-
   return (
-    <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#fff8f4' }}>
-      <div className="bg-white border border-gray-200 rounded-xl p-10 w-full max-w-sm shadow-md">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: '#2d572c' }}>Floranica Login</h1>
-          <p className="text-sm text-gray-500 mt-1">Admin access only</p>
+    <div className="flex min-h-screen flex-col">
+      <ArchiveNotice />
+
+      <main className="flex flex-1 items-center justify-center px-5 py-16">
+        <div className="w-full max-w-sm">
+          <div className="rounded-2xl border border-line bg-surface p-8 shadow-sm sm:p-10">
+            <p className="eyebrow text-stem">Floranica</p>
+            <h1 className="display-md mt-2">Admin sign in</h1>
+            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+              The control panel manages inventory, suppliers and access records.
+            </p>
+
+            <div className="mt-8">
+              <LoginForm />
+            </div>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-ink-faint">
+            <Link href="/" className="rounded-sm transition-colors hover:text-ink">
+              ← Back to the site
+            </Link>
+          </p>
         </div>
-
-        <form action={action} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="username">Username</label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2"
-              style={{ focusRingColor: '#7dcf91' } as React.CSSProperties}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2"
-            />
-          </div>
-
-          {state?.error && (
-            <p className="text-red-600 text-sm">{state.error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full py-2 rounded-md font-semibold text-white transition-colors disabled:opacity-60"
-            style={{ backgroundColor: '#7dcf91' }}
-          >
-            {pending ? 'Logging in…' : 'Log In'}
-          </button>
-        </form>
-      </div>
+      </main>
     </div>
   )
 }

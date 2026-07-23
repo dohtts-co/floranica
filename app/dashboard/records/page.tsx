@@ -1,8 +1,40 @@
-import { prisma } from '@/lib/prisma'
+import type { Metadata } from 'next'
+import type { Flower } from '@/app/generated/prisma/client'
+import { getFlowers } from '@/lib/flowers'
+import { DataTable, type Column } from '@/components/admin/data-table'
+import { PageHeading, EmptyState, CategoryPills } from '@/components/admin/page-heading'
+import { DatabaseNotice } from '@/components/database-notice'
 
 export const dynamic = 'force-dynamic'
 
-const CATEGORIES = ['All', 'Rose', 'Tulip', 'Lily', 'Orchid', 'Sunflower', 'Other']
+export const metadata: Metadata = { title: 'Records' }
+
+const CATEGORIES = ['All', 'Rose', 'Tulip', 'Lily', 'Orchid', 'Sunflower', 'Other'] as const
+
+const COLUMNS: ReadonlyArray<Column<Flower>> = [
+  { key: 'name', header: 'Name', cell: f => f.name, rowHeader: true, nowrap: true },
+  {
+    key: 'category',
+    header: 'Category',
+    cell: f => (
+      <span className="rounded-full bg-stem-wash px-2.5 py-1 text-xs font-medium text-stem">
+        {f.category}
+      </span>
+    ),
+    nowrap: true,
+  },
+  { key: 'description', header: 'Description', cell: f => f.description },
+  { key: 'price', header: 'Price', cell: f => `£${f.price.toFixed(2)}`, nowrap: true },
+  { key: 'stock', header: 'Stock', cell: f => f.stock, nowrap: true },
+  {
+    key: 'image',
+    header: 'Image file',
+    cell: f => f.imageFile || 'None set',
+    nowrap: true,
+    muted: true,
+  },
+  { key: 'id', header: 'Ref', cell: f => `#${f.id}`, nowrap: true, muted: true },
+]
 
 export default async function RecordsPage({
   searchParams,
@@ -10,62 +42,37 @@ export default async function RecordsPage({
   searchParams: Promise<{ category?: string }>
 }) {
   const { category } = await searchParams
-  const flowers = await prisma.flower.findMany({
-    where: category && category !== 'All' ? { category } : undefined,
-    orderBy: { id: 'asc' },
-  })
+  const active = category ?? 'All'
+  const result = await getFlowers(category)
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4" style={{ color: '#2d572c' }}>View Records</h2>
+    <>
+      <PageHeading
+        eyebrow="Inventory"
+        title="Records"
+        description="Every flower on the books, with the fields stored against each record."
+      />
 
-      {/* Filter */}
-      <div className="flex gap-2 flex-wrap mb-6">
-        {CATEGORIES.map(cat => {
-          const active = (category ?? 'All') === cat
-          return (
-            <a
-              key={cat}
-              href={cat === 'All' ? '/dashboard/records' : `/dashboard/records?category=${cat}`}
-              className="px-4 py-1.5 rounded-full text-sm font-medium border transition-colors"
-              style={active
-                ? { backgroundColor: '#7dcf91', color: '#fff', borderColor: '#7dcf91' }
-                : { backgroundColor: '#fff', color: '#2d572c', borderColor: '#b7d7b0' }}
-            >
-              {cat}
-            </a>
-          )
-        })}
-      </div>
+      <CategoryPills categories={CATEGORIES} active={active} basePath="/dashboard/records" />
 
-      {flowers.length === 0 ? (
-        <p className="text-gray-500">No records found.</p>
+      {result.status === 'unavailable' ? (
+        <DatabaseNotice />
+      ) : result.data.length === 0 ? (
+        <EmptyState>
+          No records match the {active === 'All' ? 'current filter' : `${active} category`}.
+        </EmptyState>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr style={{ backgroundColor: '#f3f3f3' }}>
-                {['ID', 'Name', 'Category', 'Description', 'Price', 'Stock', 'Image'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-sm font-semibold border border-gray-200">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {flowers.map(f => (
-                <tr key={f.id} className="hover:bg-gray-50 border-t border-gray-100">
-                  <td className="px-4 py-3 text-sm border border-gray-200">{f.id}</td>
-                  <td className="px-4 py-3 text-sm font-medium border border-gray-200">{f.name}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">{f.category}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">{f.description}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">£{f.price.toFixed(2)}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">{f.stock}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200 text-gray-400">{f.imageFile || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <p className="mb-4 text-sm text-ink-faint">
+            {result.data.length} {result.data.length === 1 ? 'record' : 'records'}
+          </p>
+          <DataTable
+            caption="Floranica flower records, showing name, category, description, price, stock, image file and reference"
+            columns={COLUMNS}
+            rows={result.data}
+          />
+        </>
       )}
-    </div>
+    </>
   )
 }

@@ -1,39 +1,52 @@
+import type { Metadata } from 'next'
+import type { Supplier } from '@/app/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
+import { safeQuery } from '@/lib/safe-query'
+import { DataTable, type Column } from '@/components/admin/data-table'
+import { PageHeading, EmptyState } from '@/components/admin/page-heading'
+import { DatabaseNotice } from '@/components/database-notice'
 
 export const dynamic = 'force-dynamic'
 
+export const metadata: Metadata = { title: 'Suppliers' }
+
+const COLUMNS: ReadonlyArray<Column<Supplier>> = [
+  { key: 'name', header: 'Supplier', cell: s => s.name, rowHeader: true, nowrap: true },
+  {
+    key: 'email',
+    header: 'Contact email',
+    cell: s => (
+      <a href={`mailto:${s.contactEmail}`} className="rounded-sm text-stem hover:underline">
+        {s.contactEmail}
+      </a>
+    ),
+  },
+  { key: 'phone', header: 'Phone', cell: s => s.phoneNumber, nowrap: true },
+  { key: 'id', header: 'Ref', cell: s => `#${s.id}`, nowrap: true, muted: true },
+]
+
 export default async function SuppliersPage() {
-  const suppliers = await prisma.supplier.findMany({ orderBy: { id: 'asc' } })
+  const result = await safeQuery(() => prisma.supplier.findMany({ orderBy: { id: 'asc' } }))
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6" style={{ color: '#2d572c' }}>Manage Suppliers</h2>
+    <>
+      <PageHeading
+        eyebrow="Register"
+        title="Suppliers"
+        description="Growers and wholesalers supplying the five branches."
+      />
 
-      {suppliers.length === 0 ? (
-        <p className="text-gray-500">No suppliers found.</p>
+      {result.status === 'unavailable' ? (
+        <DatabaseNotice />
+      ) : result.data.length === 0 ? (
+        <EmptyState>No suppliers have been added yet.</EmptyState>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr style={{ backgroundColor: '#f3f3f3' }}>
-                {['ID', 'Supplier Name', 'Contact Email', 'Phone Number'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-sm font-semibold border border-gray-200">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {suppliers.map(s => (
-                <tr key={s.id} className="hover:bg-gray-50 border-t border-gray-100">
-                  <td className="px-4 py-3 text-sm border border-gray-200">{s.id}</td>
-                  <td className="px-4 py-3 text-sm font-medium border border-gray-200">{s.name}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">{s.contactEmail}</td>
-                  <td className="px-4 py-3 text-sm border border-gray-200">{s.phoneNumber}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="Floranica suppliers, showing name, contact email, phone number and reference"
+          columns={COLUMNS}
+          rows={result.data}
+        />
       )}
-    </div>
+    </>
   )
 }

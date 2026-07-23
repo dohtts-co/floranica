@@ -1,14 +1,141 @@
 @import "tailwindcss";
 
+@theme {
+  /* Surfaces — warm paper rather than clinical white */
+  --color-paper: oklch(98.6% 0.008 95);
+  --color-surface: oklch(100% 0 0);
+  --color-sunk: oklch(96.4% 0.010 95);
+
+  /* Ink — near-black carrying a green cast so it sits with the accent */
+  --color-ink: oklch(24% 0.025 155);
+  --color-ink-soft: oklch(46% 0.018 155);
+  --color-ink-faint: oklch(62% 0.014 155);
+
+  /* The one assertive colour */
+  --color-stem: oklch(46% 0.115 155);
+  --color-stem-hover: oklch(39% 0.115 155);
+  --color-stem-wash: oklch(95.5% 0.030 155);
+
+  /* Reserved exclusively for the archive marker */
+  --color-petal: oklch(55% 0.135 15);
+  --color-petal-wash: oklch(95.5% 0.028 15);
+
+  --color-line: oklch(90% 0.012 155);
+  --color-line-soft: oklch(94% 0.010 155);
+
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: oklch(17% 0.014 155);
+    --color-surface: oklch(21% 0.016 155);
+    --color-sunk: oklch(14% 0.012 155);
+
+    --color-ink: oklch(95% 0.010 95);
+    --color-ink-soft: oklch(76% 0.014 155);
+    --color-ink-faint: oklch(60% 0.014 155);
+
+    --color-stem: oklch(74% 0.115 155);
+    --color-stem-hover: oklch(82% 0.115 155);
+    --color-stem-wash: oklch(26% 0.045 155);
+
+    --color-petal: oklch(76% 0.110 15);
+    --color-petal-wash: oklch(27% 0.045 15);
+
+    --color-line: oklch(30% 0.016 155);
+    --color-line-soft: oklch(26% 0.014 155);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Nunito', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fff8f4;
-  color: #333;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fluid display type — scales as one curve, no breakpoint jumps */
+.display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 5.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3.6vw, 2.85rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+/* Small-caps eyebrow used to label sections */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-stem);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---- Motion -------------------------------------------------------------
+   One entrance, on the hero only, transform + opacity only.
+
+   Scroll-triggered reveals were deliberately left out. `animation-timeline:
+   view()` scrubs to scroll position, so it re-animates in reverse on the way
+   back up — the replay-on-every-scroll-past pattern. The JS alternative
+   (IntersectionObserver) either flashes or risks leaving content invisible
+   when scripting fails. On a three-card row neither cost buys anything, so
+   the content simply renders.                                              */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.7s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 80ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
