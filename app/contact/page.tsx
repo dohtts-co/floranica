@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { SiteShell } from '@/components/site-shell'
 import { ContactForm } from '@/components/contact-form'
+import { CONTACT_EMAIL, MAILTO } from '@/lib/contact'
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -37,10 +38,23 @@ export default function ContactPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-8 border-t border-line-soft pt-6 text-sm leading-relaxed text-ink-faint">
-              These branches are fictional, invented for the coursework brief this project was built
-              against.
-            </p>
+            <div className="mt-8 border-t border-line-soft pt-6">
+              <h2 className="eyebrow text-ink-faint">Want to test the project?</h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                The form above is a demonstration and goes nowhere. To reach me properly, or to get
+                sign-in details for the admin panel, email me directly.
+              </p>
+              <a
+                href={MAILTO}
+                className="mt-3 inline-block rounded-sm text-sm font-medium text-stem transition-colors hover:text-stem-hover"
+              >
+                {CONTACT_EMAIL}
+              </a>
+              <p className="mt-6 text-sm leading-relaxed text-ink-faint">
+                These branches are fictional, invented for the coursework brief this project was
+                built against.
+              </p>
+            </div>
           </aside>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CONTACT_EMAIL, MAILTO } from '@/lib/contact'
 
 export function SiteFooter() {
   return (
@@ -13,13 +14,28 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <div>
-            <p className="eyebrow text-ink-faint">Built with</p>
-            <ul className="mt-3 space-y-1.5 text-sm text-ink-soft">
-              <li>Next.js 16 · React 19</li>
-              <li>Prisma · PostgreSQL on Neon</li>
-              <li>Tailwind CSS v4</li>
-            </ul>
+          <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
+            <div>
+              <p className="eyebrow text-ink-faint">Built with</p>
+              <ul className="mt-3 space-y-1.5 text-sm text-ink-soft">
+                <li>Next.js 16 · React 19</li>
+                <li>Prisma · PostgreSQL on Neon</li>
+                <li>Tailwind CSS v4</li>
+              </ul>
+            </div>
+
+            <div className="max-w-xs">
+              <p className="eyebrow text-ink-faint">Try it yourself</p>
+              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                Email me and I will send over sign-in details for the admin panel.
+              </p>
+              <a
+                href={MAILTO}
+                className="mt-3 inline-block rounded-sm text-sm font-medium text-stem transition-colors hover:text-stem-hover"
+              >
+                {CONTACT_EMAIL}
+              </a>
+            </div>
           </div>
         </div>
 
